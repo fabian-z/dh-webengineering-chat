@@ -78,6 +78,11 @@ func main() {
 	router.Use(middleware.Recoverer)
 
 	router.Get("/ws", upgradeSocket)
+
+	var staticPath = filepath.Join(executableDirectory, "static")
+	router.Get("/css/*", http.FileServer(http.Dir(staticPath)).ServeHTTP)
+	router.Get("/js/*", http.FileServer(http.Dir(staticPath)).ServeHTTP)
+	router.Get("/gfx/*", http.FileServer(http.Dir(staticPath)).ServeHTTP)
 	router.Get("/", handleRoot)
 
 	// Manually specify timeout values
