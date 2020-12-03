@@ -83,6 +83,7 @@ func main() {
 	router.Get("/css/*", http.FileServer(http.Dir(staticPath)).ServeHTTP)
 	router.Get("/js/*", http.FileServer(http.Dir(staticPath)).ServeHTTP)
 	router.Get("/gfx/*", http.FileServer(http.Dir(staticPath)).ServeHTTP)
+	router.Get("/fonts/*", http.FileServer(http.Dir(staticPath)).ServeHTTP)
 	router.Get("/", handleRoot)
 
 	// Manually specify timeout values
