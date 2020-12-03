@@ -27,6 +27,7 @@ func addSessionCookie(sessionID string, w http.ResponseWriter) {
 		Value:    sessionID,
 		Path:     "/",
 		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
 		// Use session cookies
 		//Expires: expire,
 	}
