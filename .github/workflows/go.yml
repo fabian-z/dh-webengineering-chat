@@ -27,6 +27,12 @@ jobs:
 
     - name: Build
       run: go build
+
+    - name: Check formatting
+      run: diff -u <(echo -n) <(gofmt -d -s .)
+
+    - name: Check go vet
+      run: go vet
 #
 #    - name: Test
 #      run: go test -v ./...
