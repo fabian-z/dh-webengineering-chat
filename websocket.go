@@ -23,10 +23,7 @@ func (msg *WebsocketMessage) Encode() ([]byte, error) {
 
 func (msg *WebsocketMessage) Decode(encoded []byte) error {
 	decoder := json.NewDecoder(bytes.NewReader(encoded))
-	err := decoder.Decode(msg)
-	if err != nil {
-		return err
-	}
+	return decoder.Decode(msg)
 }
 
 func upgradeSocket(w http.ResponseWriter, r *http.Request) {
