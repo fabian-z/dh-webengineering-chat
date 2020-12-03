@@ -29,12 +29,16 @@ Assets found under static/ can be licensed under different terms:
 
 ## Roboto font
 
+Assets: static/fonts/roboto*
+
 Roboto font designed by Christian Robertson
 Licensed under Apache License Version 2.0, January 2004
 http://www.apache.org/licenses/
 
 
 ## Font Awesome Free
+
+Assets: static/gfx/favicon.png, static/css/fontawesome*, static/fonts/fa-*
 
 Icons: CC BY 4.0 License (https://creativecommons.org/licenses/by/4.0/)
 In the Font Awesome Free download, the CC BY 4.0 license applies to all icons
