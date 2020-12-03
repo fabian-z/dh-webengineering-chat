@@ -13,3 +13,41 @@ body {
     padding: 0;
     font-family: "roboto", sans-serif;
 }
+
+/* Grid generated with https://grid.layoutit.com/ - https://github.com/Leniolabs/layoutit-grid */
+.grid-container {
+    height: 100%;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 0.8fr 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 0.5fr;
+    gap: 5px 5px;
+    grid-template-areas:
+        "userlist messages messages messages"
+        "userlist messages messages messages"
+        "controls entry entry submit";
+}
+
+.grid-element {
+    border: 1px solid black;
+}
+
+.messages {
+    grid-area: messages;
+}
+
+.entry {
+    grid-area: entry;
+}
+
+.submit {
+    grid-area: submit;
+}
+
+.userlist {
+    grid-area: userlist;
+}
+
+.controls {
+    grid-area: controls;
+}

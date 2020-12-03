@@ -1,12 +1,25 @@
 <!DOCTYPE html>
 <html>
-  <head>
+
+<head>
     <title>Webengineering Chat Project</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/main.css">
-  </head>
-  <body>
-    <textarea id="textmessage" name="textmessage" placeholder="Write a message"></textarea>
-    <button type="Send message"><i class="fas fa-paper-plane"></i>Send</button>  
-  </body>
+</head>
+
+<body>
+    <div class="grid-container">
+        <div class="messages grid-element"></div>
+        <div class="entry grid-element">
+            <textarea id="textmessage" name="textmessage" placeholder="Write a message"></textarea>
+        </div>
+        <div class="submit grid-element">
+            <button type="Send message"><i class="fas fa-paper-plane"></i>Send</button>
+        </div>
+        <div class="userlist grid-element"></div>
+        <div class="controls grid-element"></div>
+    </div>
+
+</body>
+
 </html>
