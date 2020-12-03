@@ -10,6 +10,8 @@ import (
 	"io"
 	"sync"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 var (
@@ -22,8 +24,8 @@ const (
 
 // Session could also be interface{} for a generic package
 type Session struct {
-	User          string
-	Authenticated bool
+	User string
+	UUID uuid.UUID
 	//...
 }
 
@@ -113,5 +115,18 @@ func ExtendSession(id string, expiry time.Duration) error {
 	}
 
 	store.expiry[id] = time.Now().Add(expiry)
+	return nil
+}
+
+func UpdateSession(id string, session Session) error {
+	store.Lock()
+	defer store.Unlock()
+
+	_, ok := store.expiry[id]
+	if !ok {
+		return fmt.Errorf("session expired or not existing")
+	}
+
+	store.sessions[id] = session
 	return nil
 }

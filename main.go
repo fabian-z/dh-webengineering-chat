@@ -7,54 +7,38 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/fabian-z/dh-webengineering-chat/session"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/gorilla/websocket"
 )
 
-func upgradeSocket(w http.ResponseWriter, r *http.Request) {
-	c, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Println("upgrade error:", err)
-		return
-	}
-	defer c.Close()
-	for {
-		mt, message, err := c.ReadMessage()
-		if err != nil {
-			log.Println("read error:", err)
-			break
-		}
-		log.Printf("receive error: %s", message)
-		err = c.WriteMessage(mt, message)
-		if err != nil {
-			log.Println("write error:", err)
-			break
-		}
-	}
-}
-func handleRoot(w http.ResponseWriter, r *http.Request) {
-	data := struct {
-		Message string
-	}{
-		"Hello, world!",
-	}
-	err := templates.base.Execute(w, data)
-	if err != nil {
-		log.Println("Request error: ", err)
-	}
-}
-
 var (
-	// Globals must be either already concurrency safe or protected with locks
+	// Globals must be either:
+	// already concurrency safe, protected with locks or not be changed after init
 	templates *Templates
 	upgrader  = websocket.Upgrader{
 		HandshakeTimeout: 10 * time.Second,
 		// otherwise, use default options
 	}
 	executableDirectory string
+	sessionCookieName   = "session"
 )
 
+func handleRoot(w http.ResponseWriter, r *http.Request) {
+	curSession := getOrCreateUserSession(w, r)
+	data := struct {
+		Message  string
+		Username string
+	}{
+		"Hello, world!",
+		curSession.User,
+	}
+	err := templates.base.Execute(w, data)
+	if err != nil {
+		log.Println("Request error: ", err)
+	}
+}
 func main() {
 	var err error
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
@@ -71,6 +55,8 @@ func main() {
 		log.Fatal(err)
 	}
 
+	session.Initialize(time.Minute)
+
 	router := chi.NewRouter()
 
 	router.Use(middleware.RequestID)
@@ -84,6 +70,7 @@ func main() {
 	router.Get("/js/*", http.FileServer(http.Dir(staticPath)).ServeHTTP)
 	router.Get("/gfx/*", http.FileServer(http.Dir(staticPath)).ServeHTTP)
 	router.Get("/fonts/*", http.FileServer(http.Dir(staticPath)).ServeHTTP)
+
 	router.Get("/", handleRoot)
 
 	// Manually specify timeout values
