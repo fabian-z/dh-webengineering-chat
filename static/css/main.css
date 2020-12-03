@@ -19,8 +19,8 @@ body {
     height: 100%;
     width: 100%;
     display: grid;
-    grid-template-columns: 0.8fr 1fr 1fr 1fr;
-    grid-template-rows: 1fr 1fr 0.5fr;
+    grid-template-columns: 0.7fr 1.1fr 1.6fr 0.4fr;
+    grid-template-rows: 1fr 1.1fr 0.4fr;
     gap: 5px 5px;
     grid-template-areas:
         "userlist messages messages messages"
@@ -50,4 +50,10 @@ body {
 
 .controls {
     grid-area: controls;
+}
+
+#message-entry {
+    height: 100%;
+    width: 100%;
+    resize: none;
 }
