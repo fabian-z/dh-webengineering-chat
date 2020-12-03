@@ -30,6 +30,7 @@ jobs:
 
     - name: Check formatting
       run: diff -u <(echo -n) <(gofmt -d -s .)
+      shell: bash
 
     - name: Check go vet
       run: go vet
