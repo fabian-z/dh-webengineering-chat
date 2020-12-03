@@ -29,8 +29,8 @@ jobs:
       run: go build
 
     - name: Check formatting
+      if: matrix.os != 'windows-latest'
       run: diff -u <(echo -n) <(gofmt -d -s .)
-      shell: bash
 
     - name: Check go vet
       run: go vet
