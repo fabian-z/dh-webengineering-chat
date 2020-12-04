@@ -14,7 +14,7 @@ body {
     font-family: "roboto", sans-serif;
 }
 
-/* Grid generated with https://grid.layoutit.com/ - https://github.com/Leniolabs/layoutit-grid */
+/* Grid basics generated with https://grid.layoutit.com/ - https://github.com/Leniolabs/layoutit-grid */
 .grid-container {
     height: 100%;
     width: 100%;
@@ -32,23 +32,23 @@ body {
     border: 1px solid black;
 }
 
-.messages {
+#messages {
     grid-area: messages;
 }
 
-.entry {
+#entry {
     grid-area: entry;
 }
 
-.submit {
+#submit {
     grid-area: submit;
 }
 
-.userlist {
+#userlist {
     grid-area: userlist;
 }
 
-.controls {
+#controls {
     grid-area: controls;
 }
 

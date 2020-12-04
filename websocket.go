@@ -39,7 +39,7 @@ func upgradeSocket(w http.ResponseWriter, r *http.Request) {
 			log.Println("read error:", err)
 			break
 		}
-		log.Printf("receive error: %s", message)
+		log.Printf("received : %s", message)
 		err = c.WriteMessage(mt, message)
 		if err != nil {
 			log.Println("write error:", err)
