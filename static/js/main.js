@@ -8,26 +8,21 @@ function log(message) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-
-    let print = function(message) {
-        return testPrint(message, output);
-    }
-
     ws = new WebSocket(((window.location.protocol === "https:") ? "wss://" : "ws://") + window.location.host + "/ws");
 
-    ws.onopen = function(evt) {
+    ws.onopen = function() {
         log("OPEN");
-    }
-    ws.onclose = function(evt) {
+    };
+    ws.onclose = function() {
         log("CLOSE");
         ws = null;
-    }
+    };
     ws.onmessage = function(evt) {
         log("RESPONSE: " + evt.data);
-    }
+    };
     ws.onerror = function(evt) {
         log("ERROR: " + evt.data);
-    }
+    };
 
 }, false);
 
