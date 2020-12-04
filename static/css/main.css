@@ -42,6 +42,21 @@ body {
 
 #submit {
     grid-area: submit;
+    text-align: center;
+}
+
+#submit .fas {
+    font-size: 5vw;
+    color: green;
+    display: block;
+    top: 20%;
+    position: relative;
+}
+
+#submit span {
+    position: relative;
+    top: 25%;
+    font-size: 1vw;
 }
 
 #userlist {
@@ -56,4 +71,6 @@ body {
     height: 100%;
     width: 100%;
     resize: none;
+    border: none;
+    outline: none;
 }
