@@ -12,6 +12,15 @@ body {
     margin: 0;
     padding: 0;
     font-family: "roboto", sans-serif;
+    overflow: hidden;
+}
+
+textarea,
+input,
+button,
+select {
+    font-family: inherit;
+    font-size: inherit;
 }
 
 /* Grid basics generated with https://grid.layoutit.com/ - https://github.com/Leniolabs/layoutit-grid */
@@ -41,6 +50,7 @@ body {
 }
 
 #submit {
+    cursor: pointer;
     grid-area: submit;
     text-align: center;
 }
