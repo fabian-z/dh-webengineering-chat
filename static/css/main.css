@@ -45,6 +45,15 @@ select {
     grid-area: messages;
 }
 
+.message {
+    border: 1px solid black;
+    width: 80%;
+    min-height: 5%;
+    border-radius: 1vw;
+    margin: 2% auto;
+    padding: 1%;
+}
+
 #entry {
     grid-area: entry;
 }

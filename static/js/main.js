@@ -5,6 +5,8 @@ function log(message) {
     let m = document.createElement("div");
     let output = document.getElementById("messages");
     m.textContent = message;
+    m.className = "message";
+
     output.appendChild(m);
 }
 
@@ -40,15 +42,16 @@ document.getElementById("submit").addEventListener("click", function() {
     }
     log("SEND: " + input.value);
     ws.send(input.value);
+    input.value = "";
     return false;
 }, false);
 
 document.getElementById("username").addEventListener("focusout", function() {
     let input = document.getElementById("username");
 
-    if(username !== input.value){
-        log("Change Username: " +input.value); 
+    if (username !== input.value) {
+        log("Change Username: " + input.value);
         username = input.value;
         //TODO submit change to backend
-    } 
+    }
 }, false);
