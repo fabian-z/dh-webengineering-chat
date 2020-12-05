@@ -1,38 +1,55 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"log"
 	"net/http"
+
+	"github.com/google/uuid"
 )
 
-type WebsocketMessage struct {
-	Action  string
-	Payload string
+var (
+	actionClientInit = "init"
+)
+
+type InitMessage struct {
+	Action         string `json:"action"`
+	User           User   `json:"user"`
+	ConnectedUsers []User `json:"connected"`
+
+	//Messages []string
 }
 
-func (msg *WebsocketMessage) Encode() ([]byte, error) {
-	buf := new(bytes.Buffer)
-	err := json.NewEncoder(buf).Encode(msg)
-	if err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
-}
-
-func (msg *WebsocketMessage) Decode(encoded []byte) error {
-	decoder := json.NewDecoder(bytes.NewReader(encoded))
-	return decoder.Decode(msg)
+type User struct {
+	UserID   string `json:"userid"`
+	UserName string `json:"username"`
 }
 
 func upgradeSocket(w http.ResponseWriter, r *http.Request) {
+
+	sess := getOrCreateUserSession(w, r)
+
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println("upgrade error:", err)
 		return
 	}
 	defer c.Close()
+
+	err = c.WriteJSON(InitMessage{
+		Action: actionClientInit,
+		User: User{
+			UserID:   sess.UUID.String(), // do not expose session ID, use separate UUID
+			UserName: sess.User,
+		},
+		ConnectedUsers: []User{{
+			UserID:   uuid.New().String(),
+			UserName: "testuser1"},
+		}})
+
+	if err != nil {
+		log.Println("error writing init message")
+	}
+
 	for {
 		mt, message, err := c.ReadMessage()
 		if err != nil {
