@@ -20,6 +20,11 @@ document.addEventListener('DOMContentLoaded', function() {
     };
     ws.onmessage = function(evt) {
         log("RESPONSE: " + evt.data);
+
+        let msg = JSON.parse(evt.data);
+        if(msg.action === "init"){
+            document.getElementById("username").value = msg.user.username;
+        }
     };
     ws.onerror = function(evt) {
         log("ERROR: " + evt.data);
