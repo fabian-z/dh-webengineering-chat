@@ -56,8 +56,11 @@ document.getElementById("username").addEventListener("focusout", function() {
     let input = document.getElementById("username");
 
     if (username !== input.value) {
-        log("Change Username: " + input.value);
         username = input.value;
-        //TODO submit change to backend
+        let usernameChanged = {
+            action: "usernameChanged",
+            username: input.value
+        };
+        ws.send(JSON.stringify(usernameChanged));
     }
 }, false);
