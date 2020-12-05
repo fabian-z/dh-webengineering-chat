@@ -67,7 +67,7 @@ select {
 
 #submit .fas {
     font-size: 5vw;
-    color: green;
+    color: #50913F;
     display: block;
     top: 20%;
     position: relative;
@@ -81,6 +81,11 @@ select {
 
 #userlist {
     grid-area: userlist;
+}
+
+#controls .fas {
+    font-size: 2vw;
+    color: #50913F;
 }
 
 #controls {
