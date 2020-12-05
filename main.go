@@ -21,18 +21,19 @@ var (
 		HandshakeTimeout: 10 * time.Second,
 		// otherwise, use default options
 	}
+	chat                *Chat
 	executableDirectory string
 	sessionCookieName   = "session"
 )
 
 func handleRoot(w http.ResponseWriter, r *http.Request) {
-	curSession := getOrCreateUserSession(w, r)
+	user := getOrCreateUserSession(w, r)
 	data := struct {
 		Message  string
 		Username string
 	}{
 		"Hello, world!",
-		curSession.User,
+		user.UserName,
 	}
 	err := templates.base.Execute(w, data)
 	if err != nil {
@@ -54,6 +55,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	chat = new(Chat)
+	chat.Init()
 
 	session.Initialize(time.Minute)
 

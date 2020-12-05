@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/google/uuid"
+	"github.com/gorilla/websocket"
 )
 
 var (
@@ -12,9 +12,9 @@ var (
 )
 
 type InitMessage struct {
-	Action         string `json:"action"`
-	User           User   `json:"user"`
-	ConnectedUsers []User `json:"connected"`
+	Action         string  `json:"action"`
+	User           *User   `json:"user"`
+	ConnectedUsers []*User `json:"connected"`
 
 	//Messages []string
 }
@@ -25,42 +25,50 @@ type User struct {
 }
 
 func upgradeSocket(w http.ResponseWriter, r *http.Request) {
-
-	sess := getOrCreateUserSession(w, r)
+	user := getOrCreateUserSession(w, r)
 
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println("upgrade error:", err)
 		return
 	}
-	defer c.Close()
+
+	chat.connect <- UserConnection{
+		user: user,
+		conn: c,
+	}
 
 	err = c.WriteJSON(InitMessage{
-		Action: actionClientInit,
-		User: User{
-			UserID:   sess.UUID.String(), // do not expose session ID, use separate UUID
-			UserName: sess.User,
-		},
-		ConnectedUsers: []User{{
-			UserID:   uuid.New().String(),
-			UserName: "testuser1"},
-		}})
+		Action:         actionClientInit,
+		User:           user,
+		ConnectedUsers: chat.GetUsers(),
+	})
 
 	if err != nil {
 		log.Println("error writing init message")
+		return
 	}
 
 	for {
 		mt, message, err := c.ReadMessage()
 		if err != nil {
 			log.Println("read error:", err)
+			chat.disconnect <- UserConnection{
+				user: user,
+				conn: c,
+			}
 			break
+		}
+		if mt != websocket.TextMessage {
+			log.Println("received binary message from ", user.UserID)
 		}
 		log.Printf("received : %s", message)
-		err = c.WriteMessage(mt, message)
-		if err != nil {
-			log.Println("write error:", err)
-			break
+		// broadcast only for now
+		chat.send <- Message{
+			UserFrom: user,
+			UserTo:   nil,
+			Text:     string(message),
 		}
+
 	}
 }

@@ -10,8 +10,6 @@ import (
 	"io"
 	"sync"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 var (
@@ -22,12 +20,7 @@ const (
 	sessionIDLength = 64
 )
 
-// Session could also be interface{} for a generic package
-type Session struct {
-	User string
-	UUID uuid.UUID
-	//...
-}
+type Session interface{}
 
 type sessions struct {
 	sync.RWMutex
@@ -87,11 +80,11 @@ func GetSession(id string) (Session, error) {
 
 	session, ok := store.sessions[id]
 	if !ok {
-		return Session{}, fmt.Errorf("session expired or not existing")
+		return nil, fmt.Errorf("session expired or not existing")
 	}
 	expiry := store.expiry[id]
 	if time.Now().After(expiry) {
-		return Session{}, fmt.Errorf("session expired")
+		return nil, fmt.Errorf("session expired")
 	}
 
 	return session, nil
