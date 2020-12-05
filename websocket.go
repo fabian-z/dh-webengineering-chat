@@ -63,8 +63,11 @@ func upgradeSocket(w http.ResponseWriter, r *http.Request) {
 			log.Println("received binary message from ", user.UserID)
 		}
 		log.Printf("received : %s", message)
+
+		// TODO filter messages, e.g. empty or invalid text
 		// broadcast only for now
 		chat.send <- Message{
+			Action:   "broadcast",
 			UserFrom: user,
 			UserTo:   nil,
 			Text:     string(message),

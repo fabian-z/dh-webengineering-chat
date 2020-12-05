@@ -12,6 +12,7 @@ type UserConnection struct {
 }
 
 type Message struct {
+	Action   string `json:"action"` // broadcast or unicast
 	UserFrom *User  `json:"sender"`
 	UserTo   *User  `json:"-"` // nil for broadcast
 	Text     string `json:"text"`

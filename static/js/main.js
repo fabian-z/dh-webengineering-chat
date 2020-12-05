@@ -14,20 +14,26 @@ document.addEventListener('DOMContentLoaded', function() {
     ws = new WebSocket(((window.location.protocol === "https:") ? "wss://" : "ws://") + window.location.host + "/ws");
 
     ws.onopen = function() {
-        log("OPEN");
+        log("Connected to chatroom");
     };
     ws.onclose = function() {
-        log("CLOSE");
+        log("Disconnected from chatroom");
         ws = null;
     };
     ws.onmessage = function(evt) {
-        log("RESPONSE: " + evt.data);
+        //log("RESPONSE: " + evt.data);
 
         let msg = JSON.parse(evt.data);
-        if(msg.action === "init"){
-            document.getElementById("username").value = msg.user.username;
+        switch (msg.action) {
+            case "init":
+                document.getElementById("username").value = msg.user.username;
+                break;
+            case "broadcast":
+                log(`${msg.sender.username}: ${msg.text}`);
+                break;
         }
-    };
+
+    }
     ws.onerror = function(evt) {
         log("ERROR: " + evt.data);
     };
@@ -37,10 +43,10 @@ document.addEventListener('DOMContentLoaded', function() {
 document.getElementById("submit").addEventListener("click", function() {
     let input = document.getElementById("message-entry");
 
-    if (!ws) {
+    if (!ws || input.value.length === 0) {
         return false;
     }
-    log("SEND: " + input.value);
+    //log("SEND: " + input.value);
     ws.send(input.value);
     input.value = "";
     return false;

@@ -43,6 +43,7 @@ select {
 
 #messages {
     grid-area: messages;
+    overflow-y: scroll;
 }
 
 .message {
