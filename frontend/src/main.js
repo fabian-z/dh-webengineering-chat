@@ -5,17 +5,17 @@ import {
 
 let ws;
 let username = "Anonymous";
+// TODO identicon cache?
 
 function log(message) {
     let m = document.createElement("div");
     let output = document.getElementById("messages");
     m.textContent = message;
     m.className = "message";
-
     output.appendChild(m);
 }
 
-function updateUserlist(connected) {
+function initUserlist(connected) {
     // fill user list
     let userlist = document.createElement("div");
     for (let user of connected) {
@@ -47,12 +47,14 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById("submit-icon").style.color = "#50913F";
         document.getElementById("submit").style.cursor = "pointer";
     };
+
     ws.onclose = function() {
         log("Disconnected from chatroom");
         document.getElementById("submit-icon").style.color = "darkgrey";
         document.getElementById("submit").style.cursor = "not-allowed";
         ws = null;
     };
+
     ws.onmessage = function(evt) {
         //log("RESPONSE: " + evt.data);
 
@@ -62,16 +64,55 @@ document.addEventListener('DOMContentLoaded', function() {
                 // fill user data
                 document.getElementById("username").value = msg.user.username;
                 document.getElementById("usericon").innerHTML = toSvg(msg.user.userid, 100);
-                updateUserlist(msg.connected);
+                initUserlist(msg.connected);
                 break;
             case "broadcast":
-                log(`${msg.sender.username}: ${msg.text}`);
+                let m = document.createElement("div");
+                m.className = "message";
+
+                let text = document.createElement("div");
+                text.className = "message-text";
+                text.textContent = `${msg.sender.username}: ${msg.text}`;
+
+                let identicon = document.createElement("div");
+                identicon.className = "message-image";
+                identicon.innerHTML = toSvg(msg.sender.userid, 100);
+
+                m.appendChild(identicon);
+                m.appendChild(text);
+
+                document.getElementById("messages").appendChild(m);
+
+                //log(`${msg.sender.username}: ${msg.text}`);
                 break;
             case "systemBroadcast":
                 log(`${msg.text}`);
                 break;
-            case "updateUserlist":
-                updateUserlist(msg.connected);
+            case "newUser":
+                let userEntry = document.createElement("div");
+                userEntry.className = "user-connected";
+                userEntry.dataset.userid = msg.sender.userid;
+
+                let userImage = document.createElement("div");
+                userImage.className = "user-image";
+                userImage.innerHTML = toSvg(msg.sender.userid, 100);
+
+                let userName = document.createElement("div");
+                userName.className = "user-name";
+                userName.innerHTML = msg.sender.username;
+
+                userEntry.appendChild(userImage);
+                userEntry.appendChild(userName);
+
+                document.getElementById("userlist").appendChild(userEntry);
+                break;
+            case "removeUser":
+                document.querySelectorAll(`.user-connected[data-userid='${msg.sender.userid}']`)[0].remove();
+                break;
+            case "usernameChange":
+                let usernameElem = document.querySelectorAll(`.user-connected[data-userid='${msg.sender.userid}']`)[0].children[1];
+                log(`User ${usernameElem.textContent} changed name to ${msg.sender.username}`);
+                usernameElem.textContent = msg.sender.username;
                 break;
             default:
                 console.log("Unhandled message action:", msg);
@@ -96,7 +137,6 @@ document.getElementById("submit").addEventListener("click", function() {
         text: input.value.trim(),
     };
 
-    //log("SEND: " + input.value);
     ws.send(JSON.stringify(msg));
     input.value = "";
     return false;
@@ -104,7 +144,6 @@ document.getElementById("submit").addEventListener("click", function() {
 
 document.getElementById("username").addEventListener("focusout", function() {
     let input = document.getElementById("username");
-
     if (username !== input.value) {
         username = input.value;
         let usernameChanged = {

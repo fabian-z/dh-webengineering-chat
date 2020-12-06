@@ -12,18 +12,6 @@ type UserConnection struct {
 	conn *websocket.Conn
 }
 
-type Message struct {
-	Action   string    `json:"action"` // broadcast or unicast
-	UserFrom User      `json:"sender,omitempty"`
-	UserTo   uuid.UUID `json:"-"`
-	Text     string    `json:"text"`
-}
-
-type UpdateUsersMessage struct {
-	Action         string `json:"action"`
-	ConnectedUsers []User `json:"connected"`
-}
-
 type Chat struct {
 	connectedClients map[uuid.UUID]*websocket.Conn
 
@@ -36,7 +24,7 @@ type Chat struct {
 func (chat *Chat) Init() {
 	chat.connectedClients = make(map[uuid.UUID]*websocket.Conn)
 
-	chat.send = make(chan Message, 1)
+	chat.send = make(chan Message, 10)
 	chat.userList = make(chan chan []uuid.UUID)
 	chat.connect = make(chan UserConnection)
 	chat.disconnect = make(chan UserConnection)
@@ -49,7 +37,26 @@ func (chat *Chat) Init() {
 
 				// Add user to internal list
 				chat.connectedClients[connection.user] = connection.conn
-				chat.updateUserlist(connection.user)
+
+				user, err := users.GetUser(connection.user)
+				if err != nil {
+					panic("Invalid user added in chat clients")
+				}
+
+				message := Message{
+					Action:   "newUser",
+					UserFrom: user,
+				}
+				for user, conn := range chat.connectedClients {
+					if user == connection.user {
+						continue
+					}
+					err := conn.WriteJSON(message)
+					if err != nil {
+						conn.Close()
+						delete(chat.connectedClients, user)
+					}
+				}
 
 			case connection := <-chat.disconnect:
 				// currently only handles disconnection by user
@@ -58,7 +65,26 @@ func (chat *Chat) Init() {
 					ws.Close()
 				}
 				delete(chat.connectedClients, connection.user)
-				chat.updateUserlist(connection.user)
+
+				user, err := users.GetUser(connection.user)
+				if err != nil {
+					panic("Invalid user added in chat clients")
+				}
+
+				message := Message{
+					Action:   "removeUser",
+					UserFrom: user,
+				}
+				for user, conn := range chat.connectedClients {
+					if user == connection.user {
+						continue
+					}
+					err := conn.WriteJSON(message)
+					if err != nil {
+						conn.Close()
+						delete(chat.connectedClients, user)
+					}
+				}
 
 			case listChan := <-chat.userList:
 				log.Printf("listing users")
@@ -71,7 +97,7 @@ func (chat *Chat) Init() {
 			case message := <-chat.send:
 
 				switch message.Action {
-				case "broadcast", "systemBroadcast":
+				case "broadcast", "usernameChange":
 					log.Println("Broadcasting message")
 					for user, conn := range chat.connectedClients {
 						err := conn.WriteJSON(message)
@@ -79,10 +105,6 @@ func (chat *Chat) Init() {
 							conn.Close()
 							delete(chat.connectedClients, user)
 						}
-					}
-					if message.Action == "systemBroadcast" {
-						// Hack, update userlist on systemBroadcast
-						chat.updateUserlist([16]byte{})
 					}
 				case "unicast":
 					// unicast
@@ -101,33 +123,6 @@ func (chat *Chat) Init() {
 		}
 	}()
 }
-
-func (chat *Chat) updateUserlist(changedUser uuid.UUID) {
-	// compile list and inform other users about new connection
-	var userList []User
-	for u := range chat.connectedClients {
-		user, err := users.GetUser(u)
-		if err != nil {
-			panic("Invalid user listed in chat clients")
-		}
-		userList = append(userList, user)
-	}
-	updateMsg := UpdateUsersMessage{
-		Action:         "updateUserlist",
-		ConnectedUsers: userList,
-	}
-	for user, conn := range chat.connectedClients {
-		if user == changedUser {
-			continue
-		}
-		err := conn.WriteJSON(updateMsg)
-		if err != nil {
-			conn.Close()
-			delete(chat.connectedClients, user)
-		}
-	}
-}
-
 func (chat *Chat) GetUsers() []User {
 	listChan := make(chan []uuid.UUID)
 	chat.userList <- listChan

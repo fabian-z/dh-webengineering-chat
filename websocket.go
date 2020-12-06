@@ -3,33 +3,11 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/gorilla/websocket"
 )
-
-var (
-	actionClientInit = "init"
-)
-
-type InitMessage struct {
-	Action         string `json:"action"`
-	User           User   `json:"user"`
-	ConnectedUsers []User `json:"connected"`
-}
-
-type ClientMessage struct {
-	Action   string `json:"action"`
-	Text     string `json:"text"`
-	UserName string `json:"username"`
-}
-
-type SystemMessage struct {
-	Action string `json:"action"`
-	Text   string `json:"text"`
-}
 
 func upgradeSocket(w http.ResponseWriter, r *http.Request) {
 	userID := getOrCreateUserSession(w, r)
@@ -102,10 +80,11 @@ func upgradeSocket(w http.ResponseWriter, r *http.Request) {
 				Text:     clientMessage.Text,
 			}
 		case "usernameChange":
-			users.SetUser(userID, User{UserID: userID.String(), UserName: clientMessage.UserName})
+			newUser := User{UserID: userID.String(), UserName: clientMessage.UserName}
+			users.SetUser(userID, newUser)
 			chat.send <- Message{
-				Action: "systemBroadcast",
-				Text:   fmt.Sprintf("User '%s' changed name to '%s'", user.UserName, clientMessage.UserName),
+				Action:   "usernameChange",
+				UserFrom: newUser,
 			}
 		}
 
