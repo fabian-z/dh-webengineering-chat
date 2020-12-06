@@ -1,9 +1,6 @@
 import {
     toSvg,
 } from "jdenticon";
-3
-
-console.log(toSvg("my value", 100));
 
 let ws;
 let username = "Anonymous";
@@ -34,6 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
         switch (msg.action) {
             case "init":
                 document.getElementById("username").value = msg.user.username;
+                document.getElementById("usericon").innerHTML = toSvg(msg.user.userid, 100);
                 break;
             case "broadcast":
                 log(`${msg.sender.username}: ${msg.text}`);

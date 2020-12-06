@@ -92,6 +92,11 @@ select {
     grid-area: controls;
 }
 
+#usericon {
+    display: inline-block;
+    vertical-align: middle;
+}
+
 #message-entry {
     height: 100%;
     width: 100%;
