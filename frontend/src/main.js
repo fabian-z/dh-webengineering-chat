@@ -1,6 +1,5 @@
 import {
     toSvg,
-    update,
 } from "jdenticon";
 
 let ws;
@@ -73,13 +72,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
         let msg = JSON.parse(evt.data);
         switch (msg.action) {
-            case "init":
+            case "init": {
                 // fill user data
                 document.getElementById("username").value = msg.user.username;
                 document.getElementById("usericon").innerHTML = toSvg(msg.user.userid, 100);
                 initUserlist(msg.connected);
                 break;
-            case "broadcast":
+            }
+            case "broadcast": {
                 let m = document.createElement("div");
                 m.className = "message";
 
@@ -101,10 +101,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 //log(`${msg.sender.username}: ${msg.text}`);
                 break;
-            case "systemBroadcast":
+            }
+            case "systemBroadcast": {
                 log(`${msg.text}`);
                 break;
-            case "newUser":
+            }
+            case "newUser": {
                 let userEntry = document.createElement("div");
                 userEntry.className = "user-connected";
                 userEntry.dataset.userid = msg.sender.userid;
@@ -122,16 +124,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 document.getElementById("userlist").appendChild(userEntry);
                 break;
-            case "removeUser":
+            }
+            case "removeUser": {
                 document.querySelectorAll(`.user-connected[data-userid='${msg.sender.userid}']`)[0].remove();
                 break;
-            case "usernameChange":
+            }
+            case "usernameChange": {
                 let usernameElem = document.querySelectorAll(`.user-connected[data-userid='${msg.sender.userid}']`)[0].children[1];
                 log(`User ${usernameElem.textContent} changed name to ${msg.sender.username}`);
                 usernameElem.textContent = msg.sender.username;
                 break;
-            default:
+            }
+            default: {
                 console.log("Unhandled message action:", msg);
+            }
         }
     };
     ws.onerror = function(evt) {
