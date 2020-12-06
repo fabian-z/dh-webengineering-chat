@@ -12,7 +12,10 @@ function log(message) {
     let output = document.getElementById("messages");
     m.textContent = message;
     m.className = "message";
+
+    let oldScrollHeight = output.scrollHeight;
     output.appendChild(m);
+    conditionalMessageScroll(oldScrollHeight);
 }
 
 function initUserlist(connected) {
@@ -38,6 +41,16 @@ function initUserlist(connected) {
     }
     document.getElementById("userlist").innerHTML = userlist.innerHTML;
 }
+
+function conditionalMessageScroll(oldScrollHeight) {
+    let messages = document.getElementById("messages");
+    console.log(oldScrollHeight, messages.scrollTop + messages.clientHeight);
+    if (oldScrollHeight === messages.scrollTop + messages.clientHeight) {
+        // only scroll if scrolled to bottom before
+        messages.scrollTop = messages.scrollHeight;
+    }
+}
+
 
 document.addEventListener('DOMContentLoaded', function() {
     ws = new WebSocket(((window.location.protocol === "https:") ? "wss://" : "ws://") + window.location.host + "/ws");
@@ -81,7 +94,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 m.appendChild(identicon);
                 m.appendChild(text);
 
-                document.getElementById("messages").appendChild(m);
+                let messages = document.getElementById("messages");
+                let oldScrollHeight = messages.scrollHeight;
+                messages.appendChild(m);
+                conditionalMessageScroll(oldScrollHeight);
 
                 //log(`${msg.sender.username}: ${msg.text}`);
                 break;
@@ -139,6 +155,14 @@ document.getElementById("submit").addEventListener("click", function() {
 
     ws.send(JSON.stringify(msg));
     input.value = "";
+    return false;
+}, false);
+
+document.getElementById("message-entry").addEventListener("keypress", function(evt) {
+    if (evt.key === "Enter" && evt.shiftKey) {
+        document.getElementById("submit").click();
+        evt.preventDefault();
+    }
     return false;
 }, false);
 
