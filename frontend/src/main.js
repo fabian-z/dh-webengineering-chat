@@ -31,7 +31,7 @@ function initUserlist(connected) {
 
         let userName = document.createElement("div");
         userName.className = "user-name";
-        userName.innerHTML = user.username;
+        userName.innerText = user.username;
 
         userEntry.appendChild(userImage);
         userEntry.appendChild(userName);
@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 let userName = document.createElement("div");
                 userName.className = "user-name";
-                userName.innerHTML = msg.sender.username;
+                userName.innerText = msg.sender.username;
 
                 userEntry.appendChild(userImage);
                 userEntry.appendChild(userName);

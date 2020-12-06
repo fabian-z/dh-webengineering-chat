@@ -7,7 +7,7 @@ module.exports = {
     filename: 'bundle.js'
   },
   mode: "development",
-  devtool: 'inline-source-map',
+  devtool: 'source-map',
   optimization: {
    usedExports: true,
   },
