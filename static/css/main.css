@@ -63,20 +63,26 @@ select {
     cursor: not-allowed;
     grid-area: submit;
     text-align: center;
+    position: relative;
 }
 
 #submit .fas {
     font-size: 5vw;
     color: darkgrey;
     display: block;
-    top: 20%;
-    position: relative;
 }
 
 #submit span {
-    position: relative;
-    top: 25%;
     font-size: 1vw;
+}
+
+.center {
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
 }
 
 #userlist {
