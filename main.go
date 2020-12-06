@@ -22,6 +22,7 @@ var (
 		// otherwise, use default options
 	}
 	chat                *Chat
+	users               *Users
 	executableDirectory string
 	sessionCookieName   = "session"
 )
@@ -29,11 +30,11 @@ var (
 func handleRoot(w http.ResponseWriter, r *http.Request) {
 	user := getOrCreateUserSession(w, r)
 	data := struct {
-		Message  string
-		Username string
+		Message string
+		UserID  string
 	}{
 		"Hello, world!",
-		user.UserName,
+		user.String(),
 	}
 	err := templates.base.Execute(w, data)
 	if err != nil {
@@ -58,6 +59,9 @@ func main() {
 
 	chat = new(Chat)
 	chat.Init()
+
+	users = new(Users)
+	users.Init()
 
 	session.Initialize(time.Minute)
 

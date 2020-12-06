@@ -14,16 +14,9 @@ var (
 )
 
 type InitMessage struct {
-	Action         string  `json:"action"`
-	User           *User   `json:"user"`
-	ConnectedUsers []*User `json:"connected"`
-
-	//Messages []string
-}
-
-type User struct {
-	UserID   string `json:"userid"`
-	UserName string `json:"username"`
+	Action         string `json:"action"`
+	User           User   `json:"user"`
+	ConnectedUsers []User `json:"connected"`
 }
 
 type ClientMessage struct {
@@ -33,7 +26,7 @@ type ClientMessage struct {
 }
 
 func upgradeSocket(w http.ResponseWriter, r *http.Request) {
-	user := getOrCreateUserSession(w, r)
+	userID := getOrCreateUserSession(w, r)
 
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -41,8 +34,14 @@ func upgradeSocket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	user, err := users.GetUser(userID)
+	if err != nil {
+		log.Println("get client error:", err)
+		return
+	}
+
 	chat.connect <- UserConnection{
-		user: user,
+		user: userID,
 		conn: c,
 	}
 
@@ -62,7 +61,7 @@ func upgradeSocket(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Println("read error:", err)
 			chat.disconnect <- UserConnection{
-				user: user,
+				user: userID,
 				conn: c,
 			}
 			break
@@ -83,16 +82,22 @@ func upgradeSocket(w http.ResponseWriter, r *http.Request) {
 
 		switch clientMessage.Action {
 		case "broadcast":
+
+			user, err := users.GetUser(userID)
+			if err != nil {
+				// TODO evaluate error cases here
+				panic("invalid user")
+			}
+
 			// TODO filter messages, e.g. empty or invalid text
 			// broadcast only for now
 			chat.send <- Message{
 				Action:   "broadcast",
 				UserFrom: user,
-				UserTo:   nil,
 				Text:     clientMessage.Text,
 			}
 		case "usernameChange":
-			// TODO resolve race condition for User
+			users.SetUser(userID, User{UserID: userID.String(), UserName: clientMessage.UserName})
 		}
 
 	}
