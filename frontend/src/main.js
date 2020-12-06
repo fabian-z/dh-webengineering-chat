@@ -1,6 +1,7 @@
 import {
     toSvg,
 } from "jdenticon";
+3
 
 console.log(toSvg("my value", 100));
 
@@ -37,6 +38,11 @@ document.addEventListener('DOMContentLoaded', function() {
             case "broadcast":
                 log(`${msg.sender.username}: ${msg.text}`);
                 break;
+            case "systemBroadcast":
+                log(`${msg.text}`);
+                break;
+            default:
+                console.log("Unhandled message action:", msg);
         }
     };
     ws.onerror = function(evt) {

@@ -14,7 +14,7 @@ type UserConnection struct {
 
 type Message struct {
 	Action   string    `json:"action"` // broadcast or unicast
-	UserFrom User      `json:"sender"`
+	UserFrom User      `json:"sender,omitempty"`
 	UserTo   uuid.UUID `json:"-"`
 	Text     string    `json:"text"`
 }
@@ -59,7 +59,7 @@ func (chat *Chat) Init() {
 			case message := <-chat.send:
 
 				switch message.Action {
-				case "broadcast":
+				case "broadcast", "systemBroadcast":
 					log.Println("Broadcasting message")
 					for user, conn := range chat.connectedClients {
 						err := conn.WriteJSON(message)

@@ -97,10 +97,11 @@ func getOrCreateUserSession(w http.ResponseWriter, r *http.Request) uuid.UUID {
 			// expired or invalid cookie sent, add new session
 			sessionID, curSession = newUserSession()
 			addSessionCookie(sessionID, w)
-		}
-		err = session.ExtendSession(sessionCookie.Value, 24*time.Hour)
-		if err != nil {
-			log.Println("Error extending session: ", err)
+		} else {
+			err = session.ExtendSession(sessionCookie.Value, 24*time.Hour)
+			if err != nil {
+				log.Println("Error extending session: ", err)
+			}
 		}
 	}
 

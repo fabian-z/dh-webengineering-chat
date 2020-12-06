@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -23,6 +24,11 @@ type ClientMessage struct {
 	Action   string `json:"action"`
 	Text     string `json:"text"`
 	UserName string `json:"username"`
+}
+
+type SystemMessage struct {
+	Action string `json:"action"`
+	Text   string `json:"text"`
 }
 
 func upgradeSocket(w http.ResponseWriter, r *http.Request) {
@@ -80,15 +86,14 @@ func upgradeSocket(w http.ResponseWriter, r *http.Request) {
 
 		log.Printf("received : %s", message)
 
+		user, err := users.GetUser(userID)
+		if err != nil {
+			// TODO evaluate error cases here
+			panic("invalid user")
+		}
+
 		switch clientMessage.Action {
 		case "broadcast":
-
-			user, err := users.GetUser(userID)
-			if err != nil {
-				// TODO evaluate error cases here
-				panic("invalid user")
-			}
-
 			// TODO filter messages, e.g. empty or invalid text
 			// broadcast only for now
 			chat.send <- Message{
@@ -98,6 +103,10 @@ func upgradeSocket(w http.ResponseWriter, r *http.Request) {
 			}
 		case "usernameChange":
 			users.SetUser(userID, User{UserID: userID.String(), UserName: clientMessage.UserName})
+			chat.send <- Message{
+				Action: "systemBroadcast",
+				Text:   fmt.Sprintf("User '%s' changed name to '%s'", user.UserName, clientMessage.UserName),
+			}
 		}
 
 	}
