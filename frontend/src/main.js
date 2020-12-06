@@ -1,5 +1,6 @@
 import {
     toSvg,
+    update,
 } from "jdenticon";
 
 let ws;
@@ -70,6 +71,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 log(`${msg.text}`);
                 break;
             case "updateUserlist":
+                updateUserlist(msg.connected);
+                break;
             default:
                 console.log("Unhandled message action:", msg);
         }
