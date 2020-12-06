@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"log"
 	"net/http"
 
@@ -21,6 +23,12 @@ type InitMessage struct {
 
 type User struct {
 	UserID   string `json:"userid"`
+	UserName string `json:"username"`
+}
+
+type ClientMessage struct {
+	Action   string `json:"action"`
+	Text     string `json:"text"`
 	UserName string `json:"username"`
 }
 
@@ -61,16 +69,30 @@ func upgradeSocket(w http.ResponseWriter, r *http.Request) {
 		}
 		if mt != websocket.TextMessage {
 			log.Println("received binary message from ", user.UserID)
+			continue
 		}
+
+		var clientMessage ClientMessage
+		err = json.NewDecoder(bytes.NewReader(message)).Decode(&clientMessage)
+		if err != nil {
+			log.Println("received invalid message from ", user.UserID)
+			continue
+		}
+
 		log.Printf("received : %s", message)
 
-		// TODO filter messages, e.g. empty or invalid text
-		// broadcast only for now
-		chat.send <- Message{
-			Action:   "broadcast",
-			UserFrom: user,
-			UserTo:   nil,
-			Text:     string(message),
+		switch clientMessage.Action {
+		case "broadcast":
+			// TODO filter messages, e.g. empty or invalid text
+			// broadcast only for now
+			chat.send <- Message{
+				Action:   "broadcast",
+				UserFrom: user,
+				UserTo:   nil,
+				Text:     clientMessage.Text,
+			}
+		case "usernameChange":
+			// TODO resolve race condition for User
 		}
 
 	}

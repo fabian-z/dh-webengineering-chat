@@ -46,8 +46,15 @@ document.getElementById("submit").addEventListener("click", function() {
     if (!ws || input.value.length === 0) {
         return false;
     }
+
+    let msg = {
+        //broadcast only for now
+        action: "broadcast",
+        text: input.value.trim(),
+    }
+
     //log("SEND: " + input.value);
-    ws.send(input.value);
+    ws.send(JSON.stringify(msg));
     input.value = "";
     return false;
 }, false);
@@ -58,7 +65,7 @@ document.getElementById("username").addEventListener("focusout", function() {
     if (username !== input.value) {
         username = input.value;
         let usernameChanged = {
-            action: "usernameChanged",
+            action: "usernameChange",
             username: input.value
         };
         ws.send(JSON.stringify(usernameChanged));
