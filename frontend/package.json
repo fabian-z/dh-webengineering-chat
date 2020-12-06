@@ -1,0 +1,30 @@
+{
+    "name": "dh-webengineering-chat",
+    "version": "0.0.1",
+    "description": "Frontend for project work for lecture Web Engineering @ DHBW Lörrach",
+    "private": true,
+    "scripts": {
+        "build": "npx webpack",
+        "test": "echo \"Error: no test specified\" && exit 0"
+    },
+    "type": "module",
+    "browser": "src/main.js",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/fabian-z/dh-webengineering-chat.git"
+    },
+    "author": "",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/fabian-z/dh-webengineering-chat/issues"
+    },
+    "homepage": "https://github.com/fabian-z/dh-webengineering-chat#readme",
+    "dependencies": {
+        "jdenticon": "^3.0.1"
+    },
+    "devDependencies": {
+        "eslint": "^7.15.0",
+        "webpack": "^4.44.2",
+        "webpack-cli": "^4.2.0"
+    }
+}

@@ -1,3 +1,9 @@
+import {
+    toSvg,
+} from "jdenticon";
+
+console.log(toSvg("my value", 100));
+
 let ws;
 let username = "Anonymous";
 
@@ -32,8 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 log(`${msg.sender.username}: ${msg.text}`);
                 break;
         }
-
-    }
+    };
     ws.onerror = function(evt) {
         log("ERROR: " + evt.data);
     };
@@ -51,7 +56,7 @@ document.getElementById("submit").addEventListener("click", function() {
         //broadcast only for now
         action: "broadcast",
         text: input.value.trim(),
-    }
+    };
 
     //log("SEND: " + input.value);
     ws.send(JSON.stringify(msg));
@@ -66,7 +71,7 @@ document.getElementById("username").addEventListener("focusout", function() {
         username = input.value;
         let usernameChanged = {
             action: "usernameChange",
-            username: input.value
+            username: input.value,
         };
         ws.send(JSON.stringify(usernameChanged));
     }
