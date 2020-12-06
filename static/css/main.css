@@ -60,14 +60,14 @@ select {
 }
 
 #submit {
-    cursor: pointer;
+    cursor: not-allowed;
     grid-area: submit;
     text-align: center;
 }
 
 #submit .fas {
     font-size: 5vw;
-    color: #50913F;
+    color: darkgrey;
     display: block;
     top: 20%;
     position: relative;
@@ -83,7 +83,26 @@ select {
     grid-area: userlist;
 }
 
-#controls .fas {
+.user-connected {
+    margin-bottom: 1%;
+}
+
+.user-image {
+    width: 30%;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.user-image svg {
+    width: 100%;
+}
+
+.user-name {
+    display: inline-block;
+    width: 50%;
+}
+
+#user #controls .fas {
     font-size: 2vw;
     color: #50913F;
 }

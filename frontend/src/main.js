@@ -14,14 +14,42 @@ function log(message) {
     output.appendChild(m);
 }
 
+function updateUserlist(connected) {
+    // fill user list
+    let userlist = document.createElement("div");
+    for (let user of connected) {
+        let userEntry = document.createElement("div");
+        userEntry.className = "user-connected";
+        userEntry.dataset.userid = user.userid;
+
+        let userImage = document.createElement("div");
+        userImage.className = "user-image";
+        userImage.innerHTML = toSvg(user.userid, 100);
+
+        let userName = document.createElement("div");
+        userName.className = "user-name";
+        userName.innerHTML = user.username;
+
+        userEntry.appendChild(userImage);
+        userEntry.appendChild(userName);
+
+        userlist.appendChild(userEntry);
+    }
+    document.getElementById("userlist").innerHTML = userlist.innerHTML;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     ws = new WebSocket(((window.location.protocol === "https:") ? "wss://" : "ws://") + window.location.host + "/ws");
 
     ws.onopen = function() {
         log("Connected to chatroom");
+        document.getElementById("submit-icon").style.color = "#50913F";
+        document.getElementById("submit").style.cursor = "pointer";
     };
     ws.onclose = function() {
         log("Disconnected from chatroom");
+        document.getElementById("submit-icon").style.color = "darkgrey";
+        document.getElementById("submit").style.cursor = "not-allowed";
         ws = null;
     };
     ws.onmessage = function(evt) {
@@ -30,8 +58,10 @@ document.addEventListener('DOMContentLoaded', function() {
         let msg = JSON.parse(evt.data);
         switch (msg.action) {
             case "init":
+                // fill user data
                 document.getElementById("username").value = msg.user.username;
                 document.getElementById("usericon").innerHTML = toSvg(msg.user.userid, 100);
+                updateUserlist(msg.connected);
                 break;
             case "broadcast":
                 log(`${msg.sender.username}: ${msg.text}`);
@@ -39,6 +69,7 @@ document.addEventListener('DOMContentLoaded', function() {
             case "systemBroadcast":
                 log(`${msg.text}`);
                 break;
+            case "updateUserlist":
             default:
                 console.log("Unhandled message action:", msg);
         }
