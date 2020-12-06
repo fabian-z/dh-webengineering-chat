@@ -67,7 +67,13 @@ func main() {
 
 	router := chi.NewRouter()
 
+	// Set security headers
 	router.Use(middleware.SetHeader("Content-Security-Policy", "default-src 'none'; script-src 'self'; font-src 'self'; connect-src 'self'; img-src 'self'; style-src 'self';"))
+	router.Use(middleware.SetHeader("X-Frame-Options", "deny"))
+	router.Use(middleware.SetHeader("X-XSS-Protection", "1; mode=block"))
+	router.Use(middleware.SetHeader("X-Content-Type-Options", "nosniff"))#
+	// Feature policy would be nice, but very long https://github.com/w3c/webappsec-permissions-policy/issues/189
+
 	router.Use(middleware.RequestID)
 	router.Use(middleware.Logger)
 	router.Use(middleware.Recoverer)
