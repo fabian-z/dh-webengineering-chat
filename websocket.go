@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func upgradeSocket(w http.ResponseWriter, r *http.Request) {
+func handleSocket(w http.ResponseWriter, r *http.Request) {
 	userID := getOrCreateUserSession(w, r)
 
 	c, err := upgrader.Upgrade(w, r, nil)

@@ -67,11 +67,12 @@ func main() {
 
 	router := chi.NewRouter()
 
+	router.Use(middleware.SetHeader("Content-Security-Policy", "default-src 'none'; script-src 'self'; font-src 'self'; connect-src 'self'; img-src 'self'; style-src 'self';"))
 	router.Use(middleware.RequestID)
 	router.Use(middleware.Logger)
 	router.Use(middleware.Recoverer)
 
-	router.Get("/ws", upgradeSocket)
+	router.Get("/ws", handleSocket)
 
 	var staticPath = filepath.Join(executableDirectory, "static")
 	router.Get("/css/*", http.FileServer(http.Dir(staticPath)).ServeHTTP)
