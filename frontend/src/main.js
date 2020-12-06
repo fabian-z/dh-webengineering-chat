@@ -43,7 +43,6 @@ function initUserlist(connected) {
 
 function conditionalMessageScroll(oldScrollHeight) {
     let messages = document.getElementById("messages");
-    console.log(oldScrollHeight, messages.scrollTop + messages.clientHeight);
     if (oldScrollHeight === messages.scrollTop + messages.clientHeight) {
         // only scroll if scrolled to bottom before
         messages.scrollTop = messages.scrollHeight;
