@@ -27,7 +27,7 @@ func (chat *Chat) Init() {
 	chat.connectedClients = make(map[uuid.UUID]*websocket.Conn)
 
 	chat.maxMessageHistory = 1000
-	chat.messages = make([]Message, chat.maxMessageHistory+1)
+	chat.messages = make([]Message, 0, chat.maxMessageHistory+1)
 
 	chat.send = make(chan Message, 10)
 	chat.userList = make(chan chan []uuid.UUID)
