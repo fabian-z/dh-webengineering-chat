@@ -22,9 +22,14 @@ Project work for lecture Web Engineering @ DHBW Lörrach
 ## Extra
 
 * List of connected clients ☑
-* Forward past messages to client on new connection ☑
+* Forward past public messages to clients on new connection ☑
 * Identicons for visual representation of unique client IDs ☑
 * Session management ☑
+* Structured bi-directional communicaton using JSON ☑
+* Client name changes ☑
+* Responsive layout ☑
+  * (Not yet ready for mobile devices)
+
 
 * Unicast / private chat
   * Prepared in backend ☑

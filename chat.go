@@ -14,7 +14,7 @@ type UserConnection struct {
 
 type Chat struct {
 	connectedClients  map[uuid.UUID]*websocket.Conn
-	messages          []Message // TODO size limit, persist
+	messages          []Message // TODO persist
 	maxMessageHistory int
 
 	send       chan Message
@@ -26,8 +26,8 @@ type Chat struct {
 func (chat *Chat) Init() {
 	chat.connectedClients = make(map[uuid.UUID]*websocket.Conn)
 
-	chat.messages = make([]Message, 1001)
 	chat.maxMessageHistory = 1000
+	chat.messages = make([]Message, chat.maxMessageHistory+1)
 
 	chat.send = make(chan Message, 10)
 	chat.userList = make(chan chan []uuid.UUID)
