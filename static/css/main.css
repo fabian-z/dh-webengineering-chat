@@ -13,6 +13,7 @@ body {
     padding: 0;
     font-family: "roboto", sans-serif;
     overflow: hidden;
+    background-color: #f5f5f5;
 }
 
 textarea,
@@ -53,10 +54,20 @@ select {
     border-radius: 1vw;
     margin: 2% auto;
     padding: 1%;
+    background-color: #e3f7d4;
 }
 
 #entry {
     grid-area: entry;
+}
+
+#message-entry {
+    height: 100%;
+    width: 100%;
+    resize: none;
+    border: none;
+    outline: none;
+    padding: 1%;
 }
 
 #submit {
@@ -121,14 +132,6 @@ select {
 #usericon {
     display: inline-block;
     vertical-align: middle;
-}
-
-#message-entry {
-    height: 100%;
-    width: 100%;
-    resize: none;
-    border: none;
-    outline: none;
 }
 
 .message-image {
