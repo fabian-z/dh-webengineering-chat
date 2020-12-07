@@ -87,6 +87,7 @@ select {
 
 #userlist {
     grid-area: userlist;
+    overflow-y: auto;
 }
 
 .user-connected {
