@@ -13,7 +13,9 @@ type UserConnection struct {
 }
 
 type Chat struct {
-	connectedClients map[uuid.UUID]*websocket.Conn
+	connectedClients  map[uuid.UUID]*websocket.Conn
+	messages          []Message // TODO size limit, persist
+	maxMessageHistory int
 
 	send       chan Message
 	userList   chan chan []uuid.UUID
@@ -23,6 +25,9 @@ type Chat struct {
 
 func (chat *Chat) Init() {
 	chat.connectedClients = make(map[uuid.UUID]*websocket.Conn)
+
+	chat.messages = make([]Message, 1001)
+	chat.maxMessageHistory = 1000
 
 	chat.send = make(chan Message, 10)
 	chat.userList = make(chan chan []uuid.UUID)
@@ -58,8 +63,18 @@ func (chat *Chat) Init() {
 					}
 				}
 
+				// send past messages to new user
+				for _, msg := range chat.messages {
+					err := connection.conn.WriteJSON(msg)
+					if err != nil {
+						connection.conn.Close()
+						delete(chat.connectedClients, connection.user)
+						break
+					}
+				}
+
 			case connection := <-chat.disconnect:
-				// currently only handles disconnection by user
+				// disconnect specified user
 				log.Printf("removing user %s", connection.user.String())
 				if ws, ok := chat.connectedClients[connection.user]; ok {
 					ws.Close()
@@ -99,6 +114,13 @@ func (chat *Chat) Init() {
 				switch message.Action {
 				case "broadcast", "usernameChange":
 					log.Println("Broadcasting message")
+
+					// save public message history
+					chat.messages = append(chat.messages, message)
+					if len(chat.messages) > chat.maxMessageHistory {
+						chat.messages = chat.messages[1:]
+					}
+
 					for user, conn := range chat.connectedClients {
 						err := conn.WriteJSON(message)
 						if err != nil {
@@ -107,7 +129,7 @@ func (chat *Chat) Init() {
 						}
 					}
 				case "unicast":
-					// unicast
+					// unicast, not yet implemented in frontend
 					log.Println("Unicasting message")
 					// TODO validate use of mustparse here
 					if conn, ok := chat.connectedClients[message.UserTo]; ok {
