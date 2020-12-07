@@ -1,19 +1,56 @@
 import {
-    toSvg,
+    toSvg as generateIdenticon,
 } from "jdenticon";
 
 let ws;
 let username = "Anonymous";
-// TODO identicon cache?
+let identicons = new Map();
 
-function log(message) {
+function getIdenticon(userid) {
+    if (identicons.has(userid)) {
+        return identicons.get(userid);
+    } else {
+        let icon = generateIdenticon(userid, 100);
+        identicons.set(userid, icon);
+        return icon;
+    }
+}
+
+function appendMessage(text) {
     let m = document.createElement("div");
     let output = document.getElementById("messages");
-    m.textContent = message;
+    m.textContent = text;
     m.className = "message";
 
     let oldScrollHeight = output.scrollHeight;
     output.appendChild(m);
+    conditionalMessageScroll(oldScrollHeight);
+}
+
+function appendMessageWithIcon(msg, textOverride) {
+    let m = document.createElement("div");
+    m.className = "message";
+
+    let text = document.createElement("div");
+    text.className = "message-text";
+
+    if (textOverride) {
+        text.textContent = textOverride;
+    } else {
+        text.textContent = `${msg.sender.username}: ${msg.text}`;
+    }
+
+
+    let identicon = document.createElement("div");
+    identicon.className = "message-image";
+    identicon.innerHTML = getIdenticon(msg.sender.userid, 100);
+
+    m.appendChild(identicon);
+    m.appendChild(text);
+
+    let messages = document.getElementById("messages");
+    let oldScrollHeight = messages.scrollHeight;
+    messages.appendChild(m);
     conditionalMessageScroll(oldScrollHeight);
 }
 
@@ -27,7 +64,7 @@ function initUserlist(connected) {
 
         let userImage = document.createElement("div");
         userImage.className = "user-image";
-        userImage.innerHTML = toSvg(user.userid, 100);
+        userImage.innerHTML = getIdenticon(user.userid, 100);
 
         let userName = document.createElement("div");
         userName.className = "user-name";
@@ -53,13 +90,13 @@ document.addEventListener('DOMContentLoaded', function() {
     ws = new WebSocket(((window.location.protocol === "https:") ? "wss://" : "ws://") + window.location.host + "/ws");
 
     ws.onopen = function() {
-        log("Connected to chatroom");
+        appendMessage("Connected to chatroom");
         document.getElementById("submit-icon").style.color = "#50913F";
         document.getElementById("submit").style.cursor = "pointer";
     };
 
     ws.onclose = function() {
-        log("Disconnected from chatroom");
+        appendMessage("Disconnected from chatroom");
         document.getElementById("submit-icon").style.color = "darkgrey";
         document.getElementById("submit").style.cursor = "not-allowed";
         ws = null;
@@ -73,35 +110,16 @@ document.addEventListener('DOMContentLoaded', function() {
             case "init": {
                 // fill user data
                 document.getElementById("username").value = msg.user.username;
-                document.getElementById("usericon").innerHTML = toSvg(msg.user.userid, 100);
+                document.getElementById("usericon").innerHTML = getIdenticon(msg.user.userid, 100);
                 initUserlist(msg.connected);
                 break;
             }
             case "broadcast": {
-                let m = document.createElement("div");
-                m.className = "message";
-
-                let text = document.createElement("div");
-                text.className = "message-text";
-                text.textContent = `${msg.sender.username}: ${msg.text}`;
-
-                let identicon = document.createElement("div");
-                identicon.className = "message-image";
-                identicon.innerHTML = toSvg(msg.sender.userid, 100);
-
-                m.appendChild(identicon);
-                m.appendChild(text);
-
-                let messages = document.getElementById("messages");
-                let oldScrollHeight = messages.scrollHeight;
-                messages.appendChild(m);
-                conditionalMessageScroll(oldScrollHeight);
-
-                //log(`${msg.sender.username}: ${msg.text}`);
+                appendMessageWithIcon(msg);
                 break;
             }
             case "systemBroadcast": {
-                log(`${msg.text}`);
+                appendMessage(`${msg.text}`);
                 break;
             }
             case "newUser": {
@@ -111,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 let userImage = document.createElement("div");
                 userImage.className = "user-image";
-                userImage.innerHTML = toSvg(msg.sender.userid, 100);
+                userImage.innerHTML = getIdenticon(msg.sender.userid, 100);
 
                 let userName = document.createElement("div");
                 userName.className = "user-name";
@@ -125,12 +143,17 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             case "removeUser": {
                 document.querySelectorAll(`.user-connected[data-userid='${msg.sender.userid}']`)[0].remove();
+                identicons.delete(msg.sender.userid);
                 break;
             }
             case "usernameChange": {
-                let usernameElem = document.querySelectorAll(`.user-connected[data-userid='${msg.sender.userid}']`)[0].children[1];
-                log(`User ${usernameElem.textContent} changed name to ${msg.sender.username}`);
-                usernameElem.textContent = msg.sender.username;
+                appendMessageWithIcon(msg, `Changed name to ${msg.sender.username}`);
+
+                let userElem = document.querySelector(`.user-connected[data-userid='${msg.sender.userid}']`);
+                if (userElem) {
+                    let usernameElem = userElem.children[1];
+                    usernameElem.textContent = msg.sender.username;
+                }
                 break;
             }
             default: {
@@ -139,7 +162,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
     ws.onerror = function(evt) {
-        log("ERROR: " + evt.data);
+        appendMessage("ERROR: " + evt.data);
     };
 
 }, false);
