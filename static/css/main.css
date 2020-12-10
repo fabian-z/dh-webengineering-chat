@@ -137,7 +137,7 @@ select {
 .message-image {
     width: 3%;
     display: inline-block;
-    vertical-align: middle;
+    vertical-align: top;
 }
 
 .message-image svg {
@@ -149,6 +149,7 @@ select {
 .message-text {
     display: inline-block;
     margin-left: 1%;
+    width: 95%;
 }
 
 .user-name {
