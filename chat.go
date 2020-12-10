@@ -4,6 +4,7 @@ import (
 	"log"
 	"path/filepath"
 
+	"github.com/fabian-z/dh-webengineering-chat/session"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
@@ -58,7 +59,7 @@ func (chat *Chat) Init(messages Messages) {
 				// Add user to internal list
 				chat.connectedClients[connection.user] = connection.conn
 
-				user, err := users.GetUser(connection.user)
+				user, err := session.GetSessionByUUID(connection.user)
 				if err != nil {
 					panic("Invalid user added in chat clients")
 				}
@@ -96,7 +97,7 @@ func (chat *Chat) Init(messages Messages) {
 				}
 				delete(chat.connectedClients, connection.user)
 
-				user, err := users.GetUser(connection.user)
+				user, err := session.GetSessionByUUID(connection.user)
 				if err != nil {
 					panic("Invalid user added in chat clients")
 				}
@@ -160,14 +161,14 @@ func (chat *Chat) Init(messages Messages) {
 		}
 	}()
 }
-func (chat *Chat) GetUsers() []User {
+func (chat *Chat) GetUsers() []session.Session {
 	listChan := make(chan []uuid.UUID)
 	chat.userList <- listChan
 	userUUIDs := <-listChan
 
-	var userList []User
+	var userList []session.Session
 	for _, v := range userUUIDs {
-		u, err := users.GetUser(v)
+		u, err := session.GetSessionByUUID(v)
 		if err != nil {
 			panic("Invalid user listed in chat clients")
 		}

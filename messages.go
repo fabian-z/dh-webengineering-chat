@@ -3,9 +3,9 @@ package main
 import (
 	"encoding/gob"
 	"fmt"
-	"log"
 	"os"
 
+	"github.com/fabian-z/dh-webengineering-chat/session"
 	"github.com/google/uuid"
 )
 
@@ -15,16 +15,15 @@ var (
 
 // Server -> Client
 type Message struct {
-	Action   string    `json:"action"` // newUser, removeUser, broadcast, unicast, usernameChange
-	UserFrom User      `json:"sender,omitempty"`
-	UserTo   uuid.UUID `json:"-"`
-	Text     string    `json:"text,omitempty"`
+	Action   string          `json:"action"` // newUser, removeUser, broadcast, unicast, usernameChange
+	UserFrom session.Session `json:"sender,omitempty"`
+	UserTo   uuid.UUID       `json:"-"`
+	Text     string          `json:"text,omitempty"`
 }
 
 type Messages []Message
 
 func (m *Messages) SerializeToFile(path string) error {
-	log.Println("Serializing: ", m)
 	dst, err := os.Create(path)
 	if err != nil {
 		return fmt.Errorf("error creating file: %w", err)
@@ -51,9 +50,9 @@ func (m *Messages) DeserializeFromFile(path string) error {
 
 // Initial Server -> Client
 type InitMessage struct {
-	Action         string `json:"action"` // init
-	User           User   `json:"user"`
-	ConnectedUsers []User `json:"connected"`
+	Action         string            `json:"action"` // init
+	User           session.Session   `json:"user"`
+	ConnectedUsers []session.Session `json:"connected"`
 }
 
 // Client -> Server

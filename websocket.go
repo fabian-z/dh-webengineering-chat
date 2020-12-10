@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/fabian-z/dh-webengineering-chat/session"
 	"github.com/gorilla/websocket"
 )
 
@@ -18,7 +19,7 @@ func handleSocket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := users.GetUser(userID)
+	user, err := session.GetSessionByUUID(userID)
 	if err != nil {
 		log.Println("get client error:", err)
 		return
@@ -64,7 +65,7 @@ func handleSocket(w http.ResponseWriter, r *http.Request) {
 
 		log.Printf("received : %s", message)
 
-		user, err := users.GetUser(userID)
+		user, err := session.GetSessionByUUID(userID)
 		if err != nil {
 			// TODO evaluate error cases here
 			panic("invalid user")
@@ -80,8 +81,12 @@ func handleSocket(w http.ResponseWriter, r *http.Request) {
 				Text:     clientMessage.Text,
 			}
 		case "usernameChange":
-			newUser := User{UserID: userID.String(), UserName: clientMessage.UserName}
-			users.SetUser(userID, newUser)
+			newUser := session.Session{UserID: userID, UserName: clientMessage.UserName}
+			err := session.UpdateSessionByUUID(userID, newUser)
+			if err != nil {
+				log.Println("received username change from ", user.UserID)
+				continue
+			}
 			chat.send <- Message{
 				Action:   "usernameChange",
 				UserFrom: newUser,

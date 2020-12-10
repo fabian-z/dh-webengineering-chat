@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -25,10 +26,10 @@ var (
 		// otherwise, use default options
 	}
 	chat                *Chat
-	users               *Users
 	executableDirectory string
 	sessionCookieName   = "session"
 	messagesFileName    = "messages.gob" // appended to executableDirectory
+	sessionsFileName    = "sessions.gob"
 	maxMessageHistory   = 1000
 )
 
@@ -42,6 +43,9 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+
+	// Setup globals
+
 	var err error
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
@@ -57,43 +61,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// read message files if persisted
-
-	var messages Messages = make(Messages, 0, maxMessageHistory+1)
-	err = messages.DeserializeFromFile(filepath.Join(executableDirectory, messagesFileName))
-	if err != nil {
-		if os.IsNotExist(errors.Unwrap(err)) {
-			log.Println("No messages file found")
-		} else {
-			log.Fatalf("Error loading messages file: %v", err)
-		}
-	}
-	log.Println(messages)
-
-	chat = new(Chat)
-	chat.Init(messages)
-
-	users = new(Users)
-	users.Init()
-
-	session.Initialize(time.Minute)
-
-	// signal handling for graceful shutdown
-
-	signalChan := make(chan os.Signal, 1)
-	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM)
-	signal.Ignore(syscall.SIGHUP) // do not exit if controlling terminal closes
-
-	go func() {
-		<-signalChan
-		log.Println("Graceful shutdown requested")
-
-		chatShutdownDone := make(chan struct{})
-		chat.shutdown <- chatShutdownDone
-		<-chatShutdownDone
-
-		os.Exit(0)
-	}()
+	// Setup router and HTTP server
 
 	router := chi.NewRouter()
 
@@ -128,6 +96,73 @@ func main() {
 		Handler:           router,
 		Addr:              ":8080",
 	}
+
+	// Read message files if persisted
+
+	var messages Messages = make(Messages, 0, maxMessageHistory+1)
+	err = messages.DeserializeFromFile(filepath.Join(executableDirectory, messagesFileName))
+	if err != nil {
+		if os.IsNotExist(errors.Unwrap(err)) {
+			log.Println("No messages file found")
+		} else {
+			log.Fatalf("Error loading messages file: %v", err)
+		}
+	}
+
+	// Initialize main chat routine
+
+	chat = new(Chat)
+	chat.Init(messages)
+
+	session.Initialize(time.Minute)
+
+	// read session files if persisted
+
+	storedSessPath := filepath.Join(executableDirectory, sessionsFileName)
+	if _, err := os.Stat(storedSessPath); os.IsNotExist(err) {
+		log.Println("No sessions file found")
+	} else {
+		storedSess, err := ioutil.ReadFile(storedSessPath)
+		if err != nil {
+			log.Fatal("Could not read stored sessions:", err)
+		}
+		err = session.Deserialize(storedSess)
+		if err != nil {
+			log.Fatal("Error loading stored sessions:", err)
+		}
+	}
+
+	// signal handling for graceful shutdown
+
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM)
+	signal.Ignore(syscall.SIGHUP) // do not exit if controlling terminal closes
+
+	go func() {
+		<-signalChan
+		log.Println("Graceful shutdown requested")
+
+		chatShutdownDone := make(chan struct{})
+		chat.shutdown <- chatShutdownDone
+		<-chatShutdownDone
+
+		srv.Close()
+
+		sessionBytes, err := session.Serialize()
+		if err != nil {
+			log.Println("error serializing sessions:", err)
+		} else {
+			err = ioutil.WriteFile(storedSessPath, sessionBytes, 0600)
+			if err != nil {
+				log.Println("error writing session serialization:", err)
+				os.Remove(storedSessPath)
+			}
+		}
+
+		os.Exit(0)
+	}()
+
+	// Start listening for client requests
 
 	log.Fatal(srv.ListenAndServe())
 }
