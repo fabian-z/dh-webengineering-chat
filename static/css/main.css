@@ -121,6 +121,7 @@ select {
 .user-name {
     display: inline-block;
     width: 50%;
+    vertical-align: middle;
 }
 
 #user #controls .fas {
