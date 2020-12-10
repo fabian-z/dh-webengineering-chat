@@ -28,7 +28,7 @@ func handleSocket(w http.ResponseWriter, r *http.Request) {
 	err = c.WriteJSON(InitMessage{
 		Action:         actionClientInit,
 		User:           user,
-		ConnectedUsers: chat.GetUsers(),
+		ConnectedUsers: append(chat.GetUsers(), user),
 	})
 
 	if err != nil {
