@@ -1662,7 +1662,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById("username").addEventListener("focusout", function() {
         let input = document.getElementById("username");
         let trimmedInput = input.value.trim();
-        if (username !== trimmedInput) {
+        if (username !== trimmedInput && trimmedInput.length > 0) {
             username = trimmedInput;
             let usernameChanged = {
                 action: "usernameChange",
