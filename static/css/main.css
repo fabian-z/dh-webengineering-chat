@@ -55,6 +55,7 @@ select {
     margin: 2% auto;
     padding: 1%;
     background-color: #e3f7d4;
+    word-wrap: break-word;
 }
 
 #entry {
