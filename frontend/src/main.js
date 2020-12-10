@@ -1,10 +1,14 @@
 import {
     toSvg as generateIdenticon,
 } from "jdenticon";
+import {
+    EmojiButton,
+} from '@joeattardi/emoji-button';
 
 let ws;
 let username = "Anonymous";
 let identicons = new Map();
+let picker = new EmojiButton();
 
 function getIdenticon(userid) {
     if (identicons.has(userid)) {
@@ -87,6 +91,10 @@ function conditionalMessageScroll(oldScrollHeight) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Setup handlers when DOM is ready
+
+    // WebSocket
+
     ws = new WebSocket(((window.location.protocol === "https:") ? "wss://" : "ws://") + window.location.host + "/ws");
 
     ws.onopen = function() {
@@ -167,43 +175,54 @@ document.addEventListener('DOMContentLoaded', function() {
         appendMessage("ERROR: " + evt.data);
     };
 
-}, false);
+    // DOM event handlers
 
-document.getElementById("submit").addEventListener("click", function() {
-    let input = document.getElementById("message-entry");
+    document.getElementById("submit").addEventListener("click", function() {
+        let input = document.getElementById("message-entry");
 
-    if (!ws || input.value.length === 0) {
-        return false;
-    }
+        if (!ws || input.value.length === 0) {
+            return false;
+        }
 
-    let msg = {
-        //broadcast only for now
-        action: "broadcast",
-        text: input.value.trim(),
-    };
-
-    ws.send(JSON.stringify(msg));
-    input.value = "";
-    return false;
-}, false);
-
-document.getElementById("message-entry").addEventListener("keypress", function(evt) {
-    if (evt.key === "Enter" && evt.shiftKey) {
-        document.getElementById("submit").click();
-        evt.preventDefault();
-    }
-    return false;
-}, false);
-
-document.getElementById("username").addEventListener("focusout", function() {
-    let input = document.getElementById("username");
-    let trimmedInput = input.value.trim();
-    if (username !== trimmedInput) {
-        username = trimmedInput;
-        let usernameChanged = {
-            action: "usernameChange",
-            username: trimmedInput,
+        let msg = {
+            //broadcast only for now
+            action: "broadcast",
+            text: input.value.trim(),
         };
-        ws.send(JSON.stringify(usernameChanged));
-    }
+
+        ws.send(JSON.stringify(msg));
+        input.value = "";
+        return false;
+    }, false);
+
+    document.getElementById("message-entry").addEventListener("keypress", function(evt) {
+        if (evt.key === "Enter" && evt.shiftKey) {
+            document.getElementById("submit").click();
+            evt.preventDefault();
+        }
+        return false;
+    }, false);
+
+    document.getElementById("username").addEventListener("focusout", function() {
+        let input = document.getElementById("username");
+        let trimmedInput = input.value.trim();
+        if (username !== trimmedInput) {
+            username = trimmedInput;
+            let usernameChanged = {
+                action: "usernameChange",
+                username: trimmedInput,
+            };
+            ws.send(JSON.stringify(usernameChanged));
+        }
+    }, false);
+
+    picker.on('emoji', selection => {
+        // handle the selected emoji here
+        document.getElementById("message-entry").value += "" + selection.emoji;
+    });
+
+    document.getElementById("emoji").addEventListener('click', function() {
+        picker.togglePicker(document.getElementById("emoji"))
+    });
+
 }, false);

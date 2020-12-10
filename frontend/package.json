@@ -20,6 +20,7 @@
     },
     "homepage": "https://github.com/fabian-z/dh-webengineering-chat#readme",
     "dependencies": {
+        "@joeattardi/emoji-button": "^4.6.0",
         "jdenticon": "^3.0.1"
     },
     "devDependencies": {

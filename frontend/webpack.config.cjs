@@ -9,4 +9,17 @@ module.exports = {
   optimization: {
    usedExports: true,
   },
+  node: {
+    // prevent webpack from injecting useless setImmediate polyfill
+    setImmediate: false,
+    // prevent webpack from injecting mocks to Node native modules
+    // that does not make sense for the client
+    dgram: 'empty',
+    fs: 'empty',
+    net: 'empty',
+    tls: 'empty',
+    child_process: 'empty',
+    // prevent webpack from injecting eval / new Function through global polyfill
+    global: false,
+  },
 };
