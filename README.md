@@ -33,6 +33,7 @@ Project work for lecture Web Engineering @ DHBW Lörrach
 * Client name changes ☑
 * Responsive layout ☑
   * (Not yet ready for mobile devices)
+* Emoji picker for message input ☑
 
 * Unicast / private chat
   * Prepared in backend ☑
