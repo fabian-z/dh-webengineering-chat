@@ -1,6 +1,13 @@
 package main
 
-import "github.com/google/uuid"
+import (
+	"encoding/gob"
+	"fmt"
+	"log"
+	"os"
+
+	"github.com/google/uuid"
+)
 
 var (
 	actionClientInit = "init"
@@ -12,6 +19,34 @@ type Message struct {
 	UserFrom User      `json:"sender,omitempty"`
 	UserTo   uuid.UUID `json:"-"`
 	Text     string    `json:"text,omitempty"`
+}
+
+type Messages []Message
+
+func (m *Messages) SerializeToFile(path string) error {
+	log.Println("Serializing: ", m)
+	dst, err := os.Create(path)
+	if err != nil {
+		return fmt.Errorf("error creating file: %w", err)
+	}
+	err = gob.NewEncoder(dst).Encode(m)
+	if err != nil {
+		return fmt.Errorf("error serializing messages: %w", err)
+	}
+	return dst.Close()
+}
+
+func (m *Messages) DeserializeFromFile(path string) error {
+	src, err := os.Open(path)
+	if err != nil {
+		return fmt.Errorf("error opening file: %w", err)
+	}
+	defer src.Close()
+	err = gob.NewDecoder(src).Decode(m)
+	if err != nil {
+		return fmt.Errorf("error deserializing messages: %w", err)
+	}
+	return nil
 }
 
 // Initial Server -> Client

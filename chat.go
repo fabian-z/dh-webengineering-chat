@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"path/filepath"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
@@ -13,30 +14,44 @@ type UserConnection struct {
 }
 
 type Chat struct {
-	connectedClients  map[uuid.UUID]*websocket.Conn
-	messages          []Message // TODO persist
-	maxMessageHistory int
+	connectedClients map[uuid.UUID]*websocket.Conn
+	messages         Messages
 
 	send       chan Message
 	userList   chan chan []uuid.UUID
 	connect    chan UserConnection
 	disconnect chan UserConnection
+	shutdown   chan chan struct{}
 }
 
-func (chat *Chat) Init() {
+func (chat *Chat) Init(messages Messages) {
 	chat.connectedClients = make(map[uuid.UUID]*websocket.Conn)
 
-	chat.maxMessageHistory = 1000
-	chat.messages = make([]Message, 0, chat.maxMessageHistory+1)
+	chat.messages = messages
 
 	chat.send = make(chan Message, 10)
 	chat.userList = make(chan chan []uuid.UUID)
 	chat.connect = make(chan UserConnection)
 	chat.disconnect = make(chan UserConnection)
+	chat.shutdown = make(chan chan struct{})
 
 	go func() {
 		for {
 			select {
+			case shutdownDoneChan := <-chat.shutdown:
+				//serialize messages to storage, shutdown afterwards
+				err := chat.messages.SerializeToFile(filepath.Join(executableDirectory, messagesFileName))
+				if err != nil {
+					log.Println("Error saving messages on shutdown: ", err)
+				}
+				for _, c := range chat.connectedClients {
+					if err := c.Close(); err != nil {
+						log.Printf("Error closing client websocket: %v", err)
+					}
+				}
+				shutdownDoneChan <- struct{}{}
+				return
+
 			case connection := <-chat.connect:
 				log.Printf("adding user %s", connection.user.String())
 
@@ -117,7 +132,7 @@ func (chat *Chat) Init() {
 
 					// save public message history
 					chat.messages = append(chat.messages, message)
-					if len(chat.messages) > chat.maxMessageHistory {
+					if len(chat.messages) > maxMessageHistory {
 						chat.messages = chat.messages[1:]
 					}
 

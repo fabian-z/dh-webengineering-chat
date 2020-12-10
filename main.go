@@ -1,10 +1,13 @@
 package main
 
 import (
+	"errors"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
 	"path/filepath"
+	"syscall"
 	"time"
 
 	"github.com/fabian-z/dh-webengineering-chat/session"
@@ -25,22 +28,19 @@ var (
 	users               *Users
 	executableDirectory string
 	sessionCookieName   = "session"
+	messagesFileName    = "messages.gob" // appended to executableDirectory
+	maxMessageHistory   = 1000
 )
 
 func handleRoot(w http.ResponseWriter, r *http.Request) {
-	user := getOrCreateUserSession(w, r)
-	data := struct {
-		Message string
-		UserID  string
-	}{
-		"Hello, world!",
-		user.String(),
-	}
-	err := templates.base.Execute(w, data)
+	// intial session creation
+	getOrCreateUserSession(w, r)
+	err := templates.base.Execute(w, nil)
 	if err != nil {
 		log.Println("Request error: ", err)
 	}
 }
+
 func main() {
 	var err error
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
@@ -57,13 +57,43 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// read message files if persisted
+
+	var messages Messages = make(Messages, 0, maxMessageHistory+1)
+	err = messages.DeserializeFromFile(filepath.Join(executableDirectory, messagesFileName))
+	if err != nil {
+		if os.IsNotExist(errors.Unwrap(err)) {
+			log.Println("No messages file found")
+		} else {
+			log.Fatalf("Error loading messages file: %v", err)
+		}
+	}
+	log.Println(messages)
+
 	chat = new(Chat)
-	chat.Init()
+	chat.Init(messages)
 
 	users = new(Users)
 	users.Init()
 
 	session.Initialize(time.Minute)
+
+	// signal handling for graceful shutdown
+
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM)
+	signal.Ignore(syscall.SIGHUP) // do not exit if controlling terminal closes
+
+	go func() {
+		<-signalChan
+		log.Println("Graceful shutdown requested")
+
+		chatShutdownDone := make(chan struct{})
+		chat.shutdown <- chatShutdownDone
+		<-chatShutdownDone
+
+		os.Exit(0)
+	}()
 
 	router := chi.NewRouter()
 
