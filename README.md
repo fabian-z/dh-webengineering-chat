@@ -13,6 +13,7 @@ Project work for lecture Web Engineering @ DHBW Lörrach
 
 * The client should have at least two areas - a message area and an input area where messages can be sent to all connected clients ☑
 * Each client should be uniquely identified (with a name) ☑
+  * This project uses random UUIDs for public client identification
 
 ## Backend
 
@@ -25,14 +26,16 @@ Project work for lecture Web Engineering @ DHBW Lörrach
 * Forward past public messages to clients on new connection ☑
 * Identicons for visual representation of unique client IDs ☑
 * Session management ☑
-* Structured bi-directional communicaton using JSON ☑
+  * Session persistence ☑
+* Persistence of chat messages ☑
+* Structured bi-directional communicaton using JSON over WebSockets ☑
+  * Indicate connection status ☑
 * Client name changes ☑
 * Responsive layout ☑
   * (Not yet ready for mobile devices)
 
-
 * Unicast / private chat
   * Prepared in backend ☑
-* Persistence of chat messages 
+
 * Allow transmission of formatted content
 * More as chosen by group

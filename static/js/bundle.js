@@ -1625,11 +1625,12 @@ document.getElementById("message-entry").addEventListener("keypress", function(e
 
 document.getElementById("username").addEventListener("focusout", function() {
     let input = document.getElementById("username");
-    if (username !== input.value) {
-        username = input.value;
+    let trimmedInput = input.value.trim();
+    if (username !== trimmedInput) {
+        username = trimmedInput;
         let usernameChanged = {
             action: "usernameChange",
-            username: input.value,
+            username: trimmedInput,
         };
         ws.send(JSON.stringify(usernameChanged));
     }

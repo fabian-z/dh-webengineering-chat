@@ -63,8 +63,6 @@ func handleSocket(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		log.Printf("received : %s", message)
-
 		user, err := session.GetSessionByUUID(userID)
 		if err != nil {
 			// TODO evaluate error cases here
@@ -81,6 +79,10 @@ func handleSocket(w http.ResponseWriter, r *http.Request) {
 				Text:     clientMessage.Text,
 			}
 		case "usernameChange":
+			if user.UserName == clientMessage.UserName {
+				log.Println("invalid username change from ", user.UserID)
+				continue
+			}
 			newUser := session.Session{UserID: userID, UserName: clientMessage.UserName}
 			err := session.UpdateSessionByUUID(userID, newUser)
 			if err != nil {

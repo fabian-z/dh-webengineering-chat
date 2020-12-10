@@ -129,7 +129,6 @@ func (chat *Chat) Init(messages Messages) {
 
 				switch message.Action {
 				case "broadcast", "usernameChange":
-					log.Println("Broadcasting message")
 
 					// save public message history
 					chat.messages = append(chat.messages, message)
