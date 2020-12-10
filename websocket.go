@@ -79,7 +79,7 @@ func handleSocket(w http.ResponseWriter, r *http.Request) {
 				Text:     clientMessage.Text,
 			}
 		case "usernameChange":
-			if user.UserName == clientMessage.UserName {
+			if user.UserName == clientMessage.UserName || len(clientMessage.UserName) > 50 {
 				log.Println("invalid username change from ", user.UserID)
 				continue
 			}
