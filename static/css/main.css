@@ -122,6 +122,7 @@ select {
     display: inline-block;
     width: 50%;
     vertical-align: middle;
+    word-wrap: break-word;
 }
 
 #user #controls .fas {
