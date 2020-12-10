@@ -218,11 +218,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     picker.on('emoji', selection => {
         // handle the selected emoji here
-        document.getElementById("message-entry").value += "" + selection.emoji;
+        document.getElementById("message-entry").value += selection.emoji;
     });
 
     document.getElementById("emoji").addEventListener('click', function() {
-        picker.togglePicker(document.getElementById("emoji"))
+        picker.togglePicker(document.getElementById("emoji"));
     });
 
 }, false);
