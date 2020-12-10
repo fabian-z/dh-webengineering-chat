@@ -25,11 +25,6 @@ func handleSocket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	chat.connect <- UserConnection{
-		user: userID,
-		conn: c,
-	}
-
 	err = c.WriteJSON(InitMessage{
 		Action:         actionClientInit,
 		User:           user,
@@ -39,6 +34,11 @@ func handleSocket(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("error writing init message")
 		return
+	}
+
+	chat.connect <- UserConnection{
+		user: userID,
+		conn: c,
 	}
 
 	for {
