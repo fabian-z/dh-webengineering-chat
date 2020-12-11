@@ -71,8 +71,10 @@ func handleSocket(w http.ResponseWriter, r *http.Request) {
 
 		switch clientMessage.Action {
 		case "broadcast":
-			// TODO filter messages, e.g. empty or invalid text
-			// broadcast only for now
+			// TODO more filtering?
+			if len(clientMessage.Text) < 1 {
+				continue
+			}
 			chat.send <- Message{
 				Action:   "broadcast",
 				UserFrom: user,
@@ -92,6 +94,7 @@ func handleSocket(w http.ResponseWriter, r *http.Request) {
 			chat.send <- Message{
 				Action:   "usernameChange",
 				UserFrom: newUser,
+				Text:     user.UserName, // old username send as text
 			}
 		}
 

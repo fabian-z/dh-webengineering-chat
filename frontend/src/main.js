@@ -155,15 +155,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 break;
             }
             case "usernameChange": {
-
                 let userElem = document.querySelector(`.user-connected[data-userid='${msg.sender.userid}']`);
                 if (userElem) {
                     let usernameElem = userElem.children[1];
-                    appendMessageWithIcon(msg, `Changed name from ${usernameElem.textContent} to ${msg.sender.username}`);
                     usernameElem.textContent = msg.sender.username;
-                } else {
-                    appendMessageWithIcon(msg, `Changed name to ${msg.sender.username}`);
                 }
+                appendMessageWithIcon(msg, `Changed name from ${msg.text} to ${msg.sender.username}`);
                 break;
             }
             default: {
