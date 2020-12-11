@@ -146,8 +146,6 @@ func main() {
 		chat.shutdown <- chatShutdownDone
 		<-chatShutdownDone
 
-		srv.Close()
-
 		sessionBytes, err := session.Serialize()
 		if err != nil {
 			log.Println("error serializing sessions:", err)

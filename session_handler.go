@@ -33,8 +33,7 @@ func addSessionCookie(sessionID string, w http.ResponseWriter) {
 		Path:     "/",
 		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,
-		// Use session cookies
-		Expires: time.Now().Add(24 * time.Hour),
+		Expires:  time.Now().Add(24 * time.Hour),
 	}
 	http.SetCookie(w, &cookie)
 }
@@ -47,21 +46,20 @@ func getOrCreateUserSession(w http.ResponseWriter, r *http.Request) uuid.UUID {
 	if err == http.ErrNoCookie {
 		// no cookie sent, add new session
 		sessionID, curSession = newUserSession()
-		addSessionCookie(sessionID, w)
 	} else {
 		curSession, err = session.GetSession(sessionCookie.Value)
 		if err != nil {
 			// expired or invalid cookie sent, add new session
 			sessionID, curSession = newUserSession()
-			addSessionCookie(sessionID, w)
 		} else {
+			sessionID = sessionCookie.Value
 			// session should be valid for 24 hours after last access
-			err = session.ExtendSession(sessionCookie.Value, 24*time.Hour)
+			err = session.ExtendSession(sessionID, 24*time.Hour)
 			if err != nil {
 				log.Println("Error extending session: ", err)
 			}
 		}
 	}
-
+	addSessionCookie(sessionID, w)
 	return curSession.UserID
 }
