@@ -66,7 +66,7 @@ func main() {
 	router := chi.NewRouter()
 
 	// Set security headers
-	router.Use(middleware.SetHeader("Content-Security-Policy", "default-src 'none'; script-src 'self'; font-src 'self'; connect-src 'self'; img-src 'self'; style-src 'self' 'unsafe-inline';"))
+	router.Use(middleware.SetHeader("Content-Security-Policy", "default-src 'none'; script-src 'self'; font-src 'self'; connect-src 'self' wss: ws:; img-src 'self'; style-src 'self' 'unsafe-inline';"))
 	router.Use(middleware.SetHeader("X-Frame-Options", "deny"))
 	router.Use(middleware.SetHeader("X-XSS-Protection", "1; mode=block"))
 	router.Use(middleware.SetHeader("X-Content-Type-Options", "nosniff"))
